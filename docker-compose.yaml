@@ -20,3 +20,13 @@ services:
       - "elasticsearch"
     stdin_open: true
     tty: true
+  hack-nginx:
+    image: nginx:mainline-alpine
+    container_name: hack-nginx
+    ports:
+      - "4080:4080"
+      - "4443:4443"
+      - "1489:1489"
+    volumes:
+      - ./nginx:/etc/nginx
+    restart: always
