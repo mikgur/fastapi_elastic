@@ -11,7 +11,8 @@ services:
       - 9200:9200
   gen_api:
     build:
-      context: .
+      context: ./api
+      dockerfile: ./dockerfiles/api/Dockerfile
     ports:
       - "8000:8000"
     extra_hosts:
