@@ -6,13 +6,13 @@ LOGGING_CONFIG = {
     'version': 1,
     'loggers': {
         '': {  # root logger
-            'level': 'INFO',
+            'level': 'DEBUG',
             'handlers': ['debug_console_handler'],
         }
     },
     'handlers': {
         'debug_console_handler': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'formatter': 'info',
             'class': 'logging.StreamHandler',
             'stream': 'ext://sys.stdout',
@@ -49,11 +49,35 @@ def get_by_keyword(id : int):
     except Exception as e:
         return f'Elastic search error {e}!'
 
-@app.get("/items/by/keyword/")
+@app.get("/items/by/keywords/or/")
 def get_by_keyword(keyword: str):
+    print(keyword)
     try:
         if es is not None:
-            search_object = {'match': {'clndn': f'*{keyword}*'}}
+            search_object = {"query_string":
+                {
+                    'query': ' OR '.join([f'(*{w}*)' for w in keyword.split(' ')]),
+                    "default_field": "clndn"
+                }
+            }
+            print(search_object)
+            res = es.search(index="clinvar", query=search_object, size=1000)
+            return res
+    except Exception as e:
+        return f'Elastic search error {e}!'
+
+@app.get("/items/by/keywords/and/")
+def get_by_keyword(keyword: str):
+    print(keyword)
+    try:
+        if es is not None:
+            search_object = {"query_string":
+                {
+                    'query': ' AND '.join([f'(*{w}*)' for w in keyword.split(' ')]),
+                    "default_field": "clndn"
+                }
+            }
+            print(search_object)
             res = es.search(index="clinvar", query=search_object, size=1000)
             return res
     except Exception as e:
