@@ -1,21 +1,38 @@
-from elasticsearch import Elasticsearch
-from datetime import datetime
+from elastic_index import get_elastic_ready
 from fastapi import FastAPI
-import json
-import os
+import logging
+
+LOGGING_CONFIG = {
+    'version': 1,
+    'loggers': {
+        '': {  # root logger
+            'level': 'INFO',
+            'handlers': ['debug_console_handler'],
+        }
+    },
+    'handlers': {
+        'debug_console_handler': {
+            'level': 'INFO',
+            'formatter': 'info',
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout',
+        }
+    },
+    'formatters': {
+        'info': {
+            'format': '%(asctime)s-%(levelname)s-%(name)s::%(module)s|%(lineno)s:: %(message)s'
+        }
+    },
+}
+
+logging.config.dictConfig(LOGGING_CONFIG)
 
 app = FastAPI()
 
 host = 'elasticsearch'
 port = 9200
-es = Elasticsearch(f'http://{host}:{port}')
-clinvar_dir = os.path.join(os.path.dirname(__file__), 'data/clinvar_filtered.json')
-with open(clinvar_dir, 'r') as file:
-    clinvar = json.load(file)
-i = 1
-for row in clinvar:
-    resp = es.index(index="clinvar", id=i, document=row)
-    i += 1
+
+es = get_elastic_ready(host, port)
 
 @app.get("/")
 def home():
