@@ -20,12 +20,11 @@ for row in clinvar:
 @app.get("/")
 def home():
     try:
-        resp = es.get(index='clinvar', id=200)
-        return resp
+        return 'DeeploId API'
     except Exception as e:
         return f'Elastic search error {e}!'
 
-@app.get("/byid/")
+@app.get("/items/by/id/")
 def get_by_keyword(id : int):
     try:
         resp = es.get(index='clinvar', id=id)
@@ -33,17 +32,17 @@ def get_by_keyword(id : int):
     except Exception as e:
         return f'Elastic search error {e}!'
 
-@app.get("/bykeyword/")
+@app.get("/items/by/keyword/")
 def get_by_keyword(keyword: str):
     try:
         if es is not None:
-            search_object = {'match': {'clndn': keyword}}
+            search_object = {'match': {'clndn': f'*{keyword}*'}}
             res = es.search(index="clinvar", query=search_object, size=1000)
             return res
     except Exception as e:
         return f'Elastic search error {e}!'
 
-@app.get("/byrs/")
+@app.get("/items/by/rs/")
 def get_by_rs(rs: str):
     try:
         if es is not None:
