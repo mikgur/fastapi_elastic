@@ -8,16 +8,15 @@ services:
       - xpack.security.enabled=false
       - ES_JAVA_OPTS=$JAVA_OPTS
       - discovery.type=single-node
-
     ports:
       - 9200:9200
-  # telegram-bot:
-  #   build:
-  #     context: ./bot
-  #     dockerfile: ./Dockerfile
-  #   volumes:
-  #     - ./data/:/telegram_bot/load/data/
-  #   restart: always
+  telegram-bot:
+    build:
+      context: ./bot
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./data/:/telegram_bot/load/data/
+    restart: always
   gen_api:
     build:
       context: ./api
