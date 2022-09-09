@@ -4,6 +4,9 @@ import json
 import time
 import logging
 
+MAX_ATTEMPTS = 10
+ATTEMPT_TIMEOUT = 20
+
 def get_elastic_ready(host, port):
     es = Elasticsearch(f'http://{host}:{port}')
 
@@ -17,21 +20,19 @@ def get_elastic_ready(host, port):
         actions.append(action)
         actions.append(row)
 
-    num_tries = 0
+    attempt_n = 1
     index_loaded = False
     while not index_loaded:
         try:
-            # print(f'Trying {num_tries}')
-            logging.info(f'Loading elasticsearch index attempt #{num_tries}')
+            logging.info(f'Loading elasticsearch index attempt #{attempt_n}')
             es.bulk(index="clinvar", operations=actions)
             # print('Success!!!')
             logging.info(f'Elasticsearch index loaded successfully!')
             index_loaded = True
         except Exception as e:
-            # print(f'Failed {num_tries}')
-            logging.info(f'Loading elasticsearch index attempt #{num_tries} failed')
-            if num_tries > 4:
+            logging.info(f'Loading elasticsearch index attempt #{attempt_n} failed')
+            if attempt_n > MAX_ATTEMPTS:
                 raise e
-            num_tries += 1
-            time.sleep(10)
+            attempt_n += 1
+            time.sleep(ATTEMPT_TIMEOUT)
     return es
